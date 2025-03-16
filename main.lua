@@ -4,7 +4,6 @@ local battleManager = require("battlemanager")
 local craftManager = require("craftmanager")
 
 local gameState = "menu" -- 当前游戏状态，默认为菜单界面
-local font -- 用于存储加载的字体
 local particleEffect -- 用于存储粒子效果
 
 -- 解析 CSV 文件的函数
@@ -34,7 +33,7 @@ function love.load()
     -- 加载中文字体
     font1 = love.graphics.newFont("Fonts/Microsoft_YaHei_Bold.ttf", 20) -- 加载字体文件，字号为20
     font2 = love.graphics.newFont("Fonts/AlimamaFangYuanTiVF-Thin.ttf", 20) -- 加载字体文件，字号为30
-    love.graphics.setFont(font1) -- 设置全局字体
+    love.graphics.setFont(font2) -- 设置全局字体
 
     -- 初始化粒子效果
     particleEffect = particles.new(100, 100)
