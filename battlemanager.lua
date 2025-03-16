@@ -39,7 +39,7 @@ function  getFabaoData()
             for value in line:gmatch("([^,]+)") do
                 table.insert(row, value)
             end
-            local f = Fabao.new(row[1], tonumber(row[2]), tonumber(row[3]), tonumber(row[4]), tonumber(row[5]), tonumber(row[6]), tonumber(row[7]), tonumber(row[8]), {row[9]}, row[10])
+            local f = Fabao.new(row[1], tonumber(row[2]), tonumber(row[3]), tonumber(row[4]), tonumber(row[5]), tonumber(row[6]), tonumber(row[7]), tonumber(row[8]), {row[9]}, row[10], row[11])
             table.insert(fabaoData, f)
         end
     end
@@ -64,6 +64,7 @@ end
 function battleManager.load()
     -- 初始化 Fabao
     getFabaoData()
+
     
     fabao = fabaoData[currentFabao]
 
@@ -94,6 +95,7 @@ function battleManager.update(dt)
         if monster.checkBulletCollision(target, bullet) then
             table.remove(bulletList, i)
             monster.takeDamage(target, bullet.damage, bullet.attribute)
+            print(bullet.attribute)
             screenShake.duration = 0.05 -- 屏幕震动持续时间
             screenShake.intensity = 2 -- 屏幕震动强度
 

@@ -3,7 +3,7 @@ local bullets = require("bullets")
 local Fabao = {}
 Fabao.__index = Fabao
 
-function Fabao.new(bulletType, fireRate, bulletCount, durability, durabilityCost, bulletSpeed, bulletDamage, bulletRadius, bulletEffects, imagePath)
+function Fabao.new(bulletType, fireRate, bulletCount, durability, durabilityCost, bulletSpeed, bulletDamage, bulletRadius, bulletEffects, imagePath,bulletAttribute)
     local self = setmetatable({}, Fabao)
     self.x =200
     self.y =200
@@ -20,6 +20,7 @@ function Fabao.new(bulletType, fireRate, bulletCount, durability, durabilityCost
     self.bulletRadius = bulletRadius or 5 -- 子弹半径
     self.bulletEffects = bulletEffects or {} -- 子弹效果
     self.imagepath = love.graphics.newImage(imagePath or "Sword-base.png") -- 加载法宝图片
+    self.bulletAttribute = bulletAttribute or "physical" -- 子弹属性，默认为物理属性
     return self
 end
 
@@ -45,10 +46,10 @@ function Fabao:update(dt, bulletList, target)
             local angle
             if self.bulletType == "feijian" then
                 angle = math.random() * (2 * math.pi) -- 随机方向
-                table.insert(bulletList, bullets.new(self.x, self.y, angle, self.bulletSpeed, self.bulletDamage, self.bulletRadius, self.bulletEffects, true)) -- 创建跟踪子弹
+                table.insert(bulletList, bullets.new(self.x, self.y, angle, self.bulletSpeed, self.bulletDamage, self.bulletRadius, self.bulletEffects, true,self.bulletAttribute)) -- 创建跟踪子弹
             else
                 angle = math.atan2(target.y - self.y, target.x - self.x) -- 直接指向目标
-                table.insert(bulletList, bullets.new(self.x, self.y, angle, self.bulletSpeed, self.bulletDamage, self.bulletRadius, self.bulletEffects, false)) -- 创建非跟踪子弹
+                table.insert(bulletList, bullets.new(self.x, self.y, angle, self.bulletSpeed, self.bulletDamage, self.bulletRadius, self.bulletEffects, false,self.bulletAttribute)) -- 创建非跟踪子弹
             end
         end
     end
