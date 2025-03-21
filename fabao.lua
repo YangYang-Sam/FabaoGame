@@ -1,5 +1,3 @@
-local bullets = require("bullets")
-
 local Fabao = {}
 Fabao.__index = Fabao
 

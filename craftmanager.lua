@@ -1,6 +1,3 @@
-local Fabao = require("fabao")
-local Button = require("button")
-
 local craftManager = {}
 
 local fabaoData = {}
@@ -15,12 +12,12 @@ function craftManager.load(data)
         local iconX = 50 + (i - 1) * 60
         local iconY = love.graphics.getHeight() / 2 - 30
         local buttonImage = love.graphics.newImage("Sword-base.png") -- 假设所有法宝使用相同的图标
-        local button = Button.new(buttonImage, iconX, iconY, 50, 50, function()
+        local b = button.new(buttonImage, iconX, iconY, 50, 50, function()
             print("Clicked on fabao: " .. fabao[1])
         end)
-        table.insert(buttons, button)
+        table.insert(buttons, b)
     end
-    cancelButton = Button.new(love.graphics.newImage("cancel.png"), love.graphics.getWidth() - 50, 50, 32, 32, function()
+    cancelButton = button.new(love.graphics.newImage("cancel.png"), love.graphics.getWidth() - 50, 50, 32, 32, function()
         print("Clicked on cancel button")
     end)
 end

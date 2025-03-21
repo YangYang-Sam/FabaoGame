@@ -1,13 +1,6 @@
-local bullets = require("bullets")
-local souls = require("souls")
-local monster = require("monster")
-local Fabao = require("fabao")
-local save = require("save")
-local Button = require("button")
-
 local battleManager = {}
 
-local fabao
+local lFabao
 fabaoData={}
 local bulletList = {}
 local target
@@ -39,7 +32,7 @@ function  getFabaoData()
             for value in line:gmatch("([^,]+)") do
                 table.insert(row, value)
             end
-            local f = Fabao.new(row[1], tonumber(row[2]), tonumber(row[3]), tonumber(row[4]), tonumber(row[5]), tonumber(row[6]), tonumber(row[7]), tonumber(row[8]), {row[9]}, row[10], row[11])
+            local f = fabao.new(row[1], tonumber(row[2]), tonumber(row[3]), tonumber(row[4]), tonumber(row[5]), tonumber(row[6]), tonumber(row[7]), tonumber(row[8]), {row[9]}, row[10], row[11])
             table.insert(fabaoData, f)
         end
     end
@@ -54,7 +47,7 @@ function createButton()
         local iconX = 10 + ((i - 1) % 4) * 60
         local iconY = love.graphics.getHeight() - itemY + 10 + math.floor((i - 1) / 4) * 60
         local buttonImage = fabao.imagepath
-        local button = Button.new(buttonImage, iconX, iconY, 50, 50, function()
+        local button = button.new(buttonImage, iconX, iconY, 50, 50, function()
             currentFabao = i
         end)
         table.insert(buttons, button)
@@ -66,10 +59,10 @@ function battleManager.load()
     getFabaoData()
 
     
-    fabao = fabaoData[currentFabao]
+    lFabao = fabaoData[currentFabao]
 
-    if fabao == nil then
-        fabao = Fabao.new(200, "feijian", 0.8, 3, 100, 1, 300, 1, 5, {"fire"}, "physical")
+    if lFabao == nil then
+        lFabao = fabao.new(200, "feijian", 0.8, 3, 100, 1, 300, 1, 5, {"fire"}, "physical")
         print("fabao is nil")        
     end
 
@@ -84,7 +77,7 @@ end
 
 function battleManager.update(dt)
     -- 更新 Fabao
-    fabao:update(dt, bulletList, target)
+    lFabao:update(dt, bulletList, target)
 
     -- 更新子弹
     for i = #bulletList, 1, -1 do
@@ -149,7 +142,7 @@ function battleManager.update(dt)
         button:update(dt)
     end
     --更新法宝
-    fabao = fabaoData[currentFabao]
+    lFabao = fabaoData[currentFabao]
 
 end
 
@@ -188,9 +181,9 @@ end
 
 function battleManager.draw()
     -- 绘制 Fabao
-    fabao:draw()
-    fabao:drawDurabilityBar()
-    fabao:drawFireRateBar()
+    lFabao:draw()
+    lFabao:drawDurabilityBar()
+    lFabao:drawFireRateBar()
 
     -- 绘制子弹
     for i, bullet in ipairs(bulletList) do

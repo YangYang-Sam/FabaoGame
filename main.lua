@@ -1,7 +1,4 @@
-local particles = require("particles")
-local save = require("save")
-local battleManager = require("battlemanager")
-local craftManager = require("craftmanager")
+require('dependencies')
 
 local gameState = "menu" -- 当前游戏状态，默认为菜单界面
 local particleEffect -- 用于存储粒子效果
