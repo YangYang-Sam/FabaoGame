@@ -1,65 +1,67 @@
-local monster = {}
+local Monster={}
+Monster.__index=Monster
 
-function monster.new(x, y, radius, maxHealth, physicalShield, magicShield, priority, monsterType)
-    return {
-        x = x,
-        y = y,
-        radius = radius,
-        maxHealth = maxHealth,
-        health = maxHealth,
-        physicalShield = physicalShield or 0, -- 物理护盾
-        maxPShield=physicalShield,
-        magicShield = magicShield or 0, -- 魔法护盾
-        maxMShield=magicShield,
-        hit = false,
-        hitTimer = 0,
-        damageTaken = 0, -- 记录怪物受到的伤害
-        soulDamage = 5, -- 生成灵魂所需伤害
-        priority = priority or 10, -- 优先级
-        monsterType = monsterType or "normal" -- 怪物类型
-    }
+function Monster.new(x,y,radius,maxHealth, maxPhysicalShield, maxMagicShield, priority, isBoss)
+    local self = setmetatable({}, Monster)
+    self.x = x
+    self.y = y 
+    self.radius = radius
+    self.maxHealth = maxHealth
+    self.health = maxHealth
+    self.maxPhysicalShield = maxPhysicalShield
+    self.physicalShield = maxPhysicalShield
+    self.maxMagicShield = maxMagicShield
+    self.magicShield = maxMagicShield
+    self.priority = priority or 10
+    self.isBoss = isBoss or true
+    self.isDead = false
+    self.hit=false
+    self.hitTimer=0
+    self.damageTaken=0
+    self.soulDamage=5
+    return self
 end
 
-function monster.takeDamage(monster, damage, damageType)
-    local initialHealth = monster.health
+function Monster:takeDamage(damage, damageType)
+    local initialHealth = self.health
 
-    if damageType == "physical" and monster.physicalShield > 0 then
-        local remainingDamage = damage - monster.physicalShield
-        monster.physicalShield = math.max(monster.physicalShield - damage, 0)
+    if damageType ==  'physical' and self.physicalShield > 0 then
+        local remainingDamage = damage - self.physicalShield
+        self.physicalShield = math.max(0, self.physicalShield - damage)
         if remainingDamage > 0 then
-            monster.health = monster.health - remainingDamage
+            self.health = math.max(0, self.health - remainingDamage)
         end
-    elseif damageType == "magic" and monster.magicShield > 0 then
-        local remainingDamage = damage - monster.magicShield
-        monster.magicShield = math.max(monster.magicShield - damage, 0)
+    elseif damageType == 'magic' and self.magicShield > 0 then
+        local remainingDamage = damage - self.magicShield
+        self.magicShield = math.max(0, self.magicShield - damage)
         if remainingDamage > 0 then
-            monster.health = monster.health - remainingDamage
+            self.health = math.max(0, self.health - remainingDamage)
         end
     else
-        monster.health = monster.health - damage
+        self.health = math.max(0, self.health - damage)
     end
 
-    if monster.health < initialHealth then
-        monster.damageTaken = monster.damageTaken + (initialHealth - monster.health)
+    if self.health<initialHealth then
+        self.damageTaken=self.damageTaken+initialHealth-self.health
     end
 
-    monster.hit = true
-    monster.hitTimer = 0.1 -- 受击效果持续时间
+    self.hit=true
+    self.hitTimer=0.1--受击效果持续时间
 end
 
-function monster.checkBulletCollision(monster, bullet)
-    local dist = math.sqrt((bullet.x - monster.x)^2 + (bullet.y - monster.y)^2)
-    return dist < monster.radius
+function Monster:checkBulletCollision(bullet)
+    local distance = math.sqrt((self.x - bullet.x)^2 + (self.y - bullet.y)^2)
+    return distance < self.radius + bullet.range
 end
 
-function monster.checkGenerateSoul(monster, soulList, souls)
-    while monster.damageTaken >= monster.soulDamage do
-        monster.damageTaken = monster.damageTaken - monster.soulDamage -- 重置计数器
-        table.insert(soulList, souls.new(monster.x, monster.y, math.random(-20, 20), -100))
+function Monster:checkGenerateSoul(soulList)
+    while self.damageTaken>=self.soulDamage do
+        self.damageTaken=self.damageTaken-self.soulDamage
+        table.insert(soulList,soul.new(self.x,self.y,math.random(-20, 20), -100))
     end
 end
-
-function monster.addDamageNumber(damageNumbers, bullet)
+--将伤害数值存在damageNumbers array中
+function Monster:addDamageNumber(damageNumbers,bullet)
     local angle = math.random() * (2 * math.pi) -- 随机方向
     local speed = 50 + math.random() * 50 -- 随机速度
     table.insert(damageNumbers, {
@@ -72,40 +74,40 @@ function monster.addDamageNumber(damageNumbers, bullet)
         dx = math.cos(angle) * speed,
         dy = math.sin(angle) * speed,
         gravity = 100
-    })
+        })
 end
 
-function monster.update(monster, dt)
-    if monster.hit then
-        monster.hitTimer = monster.hitTimer - dt
-        if monster.hitTimer <= 0 then
-            monster.hit = false
+function Monster:update(dt)
+    if self.hit then
+        self.hitTimer=self.hitTimer - dt
+    if self.hitTimer<=0 then
+            self.hit=false
         end
     end
 end
 
-function monster.draw(monster)
-    if monster.hit then
-        love.graphics.setColor(1, 0, 0) -- 受击时颜色为红色
-        local dx = math.random(-2, 2)
-        local dy = math.random(-2, 2)
-        love.graphics.circle("fill", monster.x + dx, monster.y + dy, monster.radius) -- 绘制震动的目标点
+function Monster:draw()
+    if self.hit then
+        love.graphics.setColor(1,0,0)
+        local dx = math. random(-2,2)
+        local dy = math. random(-2,2)
+        love.graphics.circle('fill',self.x+dx,self.y+dy,self.radius)
     else
-        love.graphics.setColor(1, 1, 0) -- 正常颜色为黄色
-        love.graphics.circle("fill", monster.x, monster.y, monster.radius) -- 绘制目标点
+        love.graphics.setColor(1,1,0)
+        love.graphics.circle('fill',self.x,self.y,self.radius)
     end
 
-    -- 绘制物理护盾
-    if monster.physicalShield > 0 then
-        love.graphics.setColor(1, 1, 1) -- 物理护盾颜色为白色
-        love.graphics.circle("line", monster.x, monster.y, monster.radius + 5)
+        --绘制物理护盾
+    if self.physicalShield>0 then
+        love.graphics.setColor(1,1,1)
+        love.graphics.circle('line',self.x,self.y,self.radius+5)
     end
 
-    -- 绘制魔法护盾
-    if monster.magicShield > 0 then
-        love.graphics.setColor(1, 0, 1) -- 魔法护盾颜色为紫色
-        love.graphics.circle("line", monster.x, monster.y, monster.radius + 10)
+        --绘制魔法护盾
+    if self.magicShield>0 then
+        love.graphics.setColor(1,0,1)
+        love.graphics.circle('line',self.x,self.y,self.radius+10)
     end
 end
 
-return monster
+return Monster

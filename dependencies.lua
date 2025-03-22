@@ -7,8 +7,10 @@ craftManager = require('craftmanager')
 -- fabao, monster
 fabao = require('fabao')
 monster = require('monster')
-souls = require('souls')
-bullets = require('bullets')
+soul= require('soul')
+--souls = require('souls')
+--bullets = require('bullets')
+bullet = require('bullet')
 
 -- 其他功能
 save = require('save')

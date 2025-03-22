@@ -47,10 +47,10 @@ function Fabao:update(dt, bulletList, target)
             local angle
             if self.bulletType == "feijian" then
                 angle = math.random() * (2 * math.pi) -- 随机方向
-                table.insert(bulletList, bullets.new(self.x, self.y, angle, self.bulletSpeed, self.bulletDamage, self.bulletRadius, self.bulletEffects, true,self.bulletAttribute)) -- 创建跟踪子弹
+                table.insert(bulletList, bullet.new(self.x, self.y, angle, self.bulletSpeed, self.bulletDamage, self.bulletRadius, self.bulletEffects, true,20,self.bulletAttribute,true,'Feijian-blt.png')) -- 创建跟踪子弹
             else
                 angle = math.atan2(target.y - self.y, target.x - self.x) -- 直接指向目标
-                table.insert(bulletList, bullets.new(self.x, self.y, angle, self.bulletSpeed, self.bulletDamage, self.bulletRadius, self.bulletEffects, false,self.bulletAttribute)) -- 创建非跟踪子弹
+                table.insert(bulletList, bullet.new(self.x, self.y, angle, self.bulletSpeed, self.bulletDamage, self.bulletRadius, self.bulletEffects, false, 20, self.bulletAttribute, true)) -- 创建非跟踪子弹
             end
         end
     end

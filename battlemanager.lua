@@ -36,7 +36,7 @@ function  getFabaoData()
             table.insert(fabaoData, f)
         end
     end
-    print(#fabaoData)
+    --print(#fabaoData)
     return fabaoData
     
 end
@@ -62,15 +62,15 @@ function battleManager.load()
     lFabao = fabaoData[currentFabao]
 
     if lFabao == nil then
-        lFabao = fabao.new(200, "feijian", 0.8, 3, 100, 1, 300, 1, 5, {"fire"}, "physical")
-        print("fabao is nil")        
+        print("fabao is nil")
+        lFabao = fabao.new(200, "feijian", 0.8, 3, 100, 1, 300, 1, 5, {"fire"}, "physical")        
     end
 
     -- 创建按钮
     createButton()
 
-    target = monster.new(600, 300, 30, 10000, 50, 50) -- 创建一个带有物理护盾和魔法护盾的怪物
-
+    target = monster.new(600, 300, 30, 10000, 0, 50, 10, true) -- 创建一个带有物理护盾和魔法护盾的怪物
+    print(target)
     -- 加载怪物的血量
     save.loadMonsterHealth(target)
 end
@@ -81,27 +81,27 @@ function battleManager.update(dt)
 
     -- 更新子弹
     for i = #bulletList, 1, -1 do
-        local bullet = bulletList[i]
-        bullets.update(bullet, dt, target)
+        local bullets = bulletList[i]
+        bullets:update(dt, target)
 
         -- 检测子弹是否击中怪物
-        if monster.checkBulletCollision(target, bullet) then
+        if target:checkBulletCollision(bullets) then
             table.remove(bulletList, i)
-            monster.takeDamage(target, bullet.damage, bullet.attribute)
-            print(bullet.attribute)
+            target:takeDamage(bullets.damage, bullets.attribute)
+            --print(bullets.attribute)
             screenShake.duration = 0.05 -- 屏幕震动持续时间
             screenShake.intensity = 2 -- 屏幕震动强度
 
             -- 检查是否需要生成新的灵魂
-            monster.checkGenerateSoul(target, soulList, souls)
+            target:checkGenerateSoul(soulList)
 
             -- 添加伤害数字
-            monster.addDamageNumber(damageNumbers, bullet)
+            target:addDamageNumber(damageNumbers, bullets)
         end
     end
 
     -- 更新怪物受击效果
-    monster.update(target, dt)
+    target:update(dt)
 
     -- 更新屏幕震动
     if screenShake.duration > 0 then
@@ -112,6 +112,7 @@ function battleManager.update(dt)
     for i = #damageNumbers, 1, -1 do
         local dmg = damageNumbers[i]
         dmg.timer = dmg.timer + dt
+        dmg.dx = dmg.dx or 0
         dmg.x = dmg.x + dmg.dx * dt
         dmg.y = dmg.y + dmg.dy * dt
         dmg.dy = dmg.dy + dmg.gravity * dt -- 应用重力
@@ -126,7 +127,7 @@ function battleManager.update(dt)
     -- 更新灵魂位置
     for i = #soulList, 1, -1 do
         local soul = soulList[i]
-        souls.update(soul, dt)
+        soul:update(dt)
     end
 
     -- 检查点击时间是否超过阈值
@@ -154,11 +155,12 @@ function battleManager.mousepressed(x, y, button, istouch, presses)
         clickX, clickY = x, y -- 记录点击位置
         clickTime = 0.5 -- 设置点击显示时间为0.5秒
         for i = #soulList, 1, -1 do
-            local soul = soulList[i]
-            local dist = math.sqrt((x - soul.x)^2 + (y - soul.y)^2)
+            local s = soulList[i]
+            local dist = math.sqrt((x - s.x)^2 + (y - s.y)^2)
             if dist < clickRadius then -- 点击到灵魂
+                collectedSouls = collectedSouls + s.weight
                 table.remove(soulList, i)
-                collectedSouls = collectedSouls + 1
+                
             end
         end
     end
@@ -186,12 +188,12 @@ function battleManager.draw()
     lFabao:drawFireRateBar()
 
     -- 绘制子弹
-    for i, bullet in ipairs(bulletList) do
-        bullets.draw(bullet)
+    for i, bullets in ipairs(bulletList) do
+        bullets:draw()
     end
 
     -- 绘制目标点（怪物）
-    monster.draw(target)
+    target:draw()
 
     -- 绘制怪物血条
     love.graphics.setColor(1, 0, 0) -- 设置颜色为红色
@@ -202,14 +204,14 @@ function battleManager.draw()
 
     -- 绘制物理护盾血条
     love.graphics.setColor(0, 0, 1) -- 设置颜色为蓝色
-    love.graphics.rectangle("fill", love.graphics.getWidth() - 210, 80, 200 * (target.physicalShield / target.maxPShield), 10) -- 绘制物理护盾血条
+    love.graphics.rectangle("fill", love.graphics.getWidth() - 210, 80, 200 * (target.physicalShield / target.maxPhysicalShield), 10) -- 绘制物理护盾血条
     love.graphics.setColor(1, 1, 1) -- 设置颜色为白色
     love.graphics.rectangle("line", love.graphics.getWidth() - 210, 80, 200, 10) -- 绘制物理护盾血条边框
     love.graphics.print("Physical Shield: " .. target.physicalShield, love.graphics.getWidth() - 210, 100) -- 绘制物理护盾数值
 
     -- 绘制魔法护盾血条
     love.graphics.setColor(1, 0, 1) -- 设置颜色为紫色
-    love.graphics.rectangle("fill", love.graphics.getWidth() - 210, 150, 200 * (target.magicShield / target.maxMShield), 10) -- 绘制魔法护盾血条
+    love.graphics.rectangle("fill", love.graphics.getWidth() - 210, 150, 200 * (target.magicShield / target.maxMagicShield), 10) -- 绘制魔法护盾血条
     love.graphics.setColor(1, 1, 1) -- 设置颜色为白色
     love.graphics.rectangle("line", love.graphics.getWidth() - 210, 150, 200, 10) -- 绘制魔法护盾血条边框
     love.graphics.print("Magic Shield: " .. target.magicShield, love.graphics.getWidth() - 210, 170) -- 绘制魔法护盾数值
@@ -221,9 +223,10 @@ function battleManager.draw()
     end
 
     -- 绘制灵魂
-    love.graphics.setColor(0, 0, 1) -- 设置颜色为蓝色
-    for i, soul in ipairs(soulList) do
-        souls.draw(soul)
+    if soulList[1] then
+        for i, souls in ipairs(soulList) do
+            souls:draw()
+        end
     end
 
     -- 绘制收集的灵魂数目
