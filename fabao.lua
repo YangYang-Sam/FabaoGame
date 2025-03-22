@@ -1,11 +1,13 @@
 local Fabao = {}
 Fabao.__index = Fabao
 
-function Fabao.new(bulletType, fireRate, bulletCount, durability, durabilityCost, bulletSpeed, bulletDamage, bulletRadius, bulletEffects, imagePath,bulletAttribute)
+function Fabao.new(fabaoId,fabaolv,bulletType, fireRate, bulletCount, durability, durabilityCost, bulletSpeed, bulletDamage, bulletRadius, bulletEffects, imagePath,bulletAttribute)
     local self = setmetatable({}, Fabao)
     self.x =200
     self.y =200
     self.speed = 200
+    self.id=fabaoId
+    self.lv=fabaolv
     self.bulletType = bulletType
     self.fireRate = fireRate
     self.bulletTimer = 0
@@ -23,6 +25,7 @@ function Fabao.new(bulletType, fireRate, bulletCount, durability, durabilityCost
 end
 
 function Fabao:update(dt, bulletList, target)
+    -- 移动法宝
     if love.keyboard.isDown("left") then
         self.x = self.x - self.speed * dt
     end

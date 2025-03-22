@@ -32,7 +32,7 @@ function  getFabaoData()
             for value in line:gmatch("([^,]+)") do
                 table.insert(row, value)
             end
-            local f = fabao.new(row[1], tonumber(row[2]), tonumber(row[3]), tonumber(row[4]), tonumber(row[5]), tonumber(row[6]), tonumber(row[7]), tonumber(row[8]), {row[9]}, row[10], row[11])
+            local f = fabao.new(tonumber(row[1]),tonumber(row[2]),row[3], tonumber(row[4]), tonumber(row[5]), tonumber(row[6]), tonumber(row[7]), tonumber(row[8]), tonumber(row[9]), tonumber(row[10]), {row[11]}, row[12], row[13])
             table.insert(fabaoData, f)
         end
     end

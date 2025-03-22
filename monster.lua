@@ -1,6 +1,6 @@
 local monster = {}
 
-function monster.new(x, y, radius, maxHealth, physicalShield, magicShield)
+function monster.new(x, y, radius, maxHealth, physicalShield, magicShield, priority, monsterType)
     return {
         x = x,
         y = y,
@@ -14,7 +14,9 @@ function monster.new(x, y, radius, maxHealth, physicalShield, magicShield)
         hit = false,
         hitTimer = 0,
         damageTaken = 0, -- 记录怪物受到的伤害
-        soulDamage = 5 -- 生成灵魂所需伤害
+        soulDamage = 5, -- 生成灵魂所需伤害
+        priority = priority or 10, -- 优先级
+        monsterType = monsterType or "normal" -- 怪物类型
     }
 end
 
