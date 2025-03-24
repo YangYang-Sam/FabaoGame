@@ -3,6 +3,7 @@
 -- managers
 battleManager = require('battlemanager')
 craftManager = require('craftmanager')
+skillManager = require('skillmanager')
 
 -- fabao, monster
 fabao = require('fabao')
@@ -11,6 +12,9 @@ soul= require('soul')
 --souls = require('souls')
 --bullets = require('bullets')
 bullet = require('bullet')
+
+--skills
+--fireball = require('Scripts.Boss.fireball')
 
 -- 其他功能
 save = require('save')

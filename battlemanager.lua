@@ -3,10 +3,11 @@ local battleManager = {}
 local lFabao
 fabaoData={}
 local bulletList = {}
+local boss
 local target
 local screenShake = { duration = 0, intensity = 0 }
-local damageNumbers = {}
-local soulList = {}
+damageNumbers = {}
+soulList = {}
 local collectedSouls = 0
 local clickRadius = 30
 local clickX, clickY = nil, nil
@@ -58,7 +59,7 @@ function battleManager.load()
     -- 初始化 Fabao
     getFabaoData()
 
-    
+
     lFabao = fabaoData[currentFabao]
 
     if lFabao == nil then
@@ -69,43 +70,16 @@ function battleManager.load()
     -- 创建按钮
     createButton()
 
-    target = monster.new(600, 300, 30, 10000, 0, 50, 10, true) -- 创建一个带有物理护盾和魔法护盾的怪物
-    print(target)
-    -- 加载怪物的血量
-    save.loadMonsterHealth(target)
+    boss = monster.new(600, 300, 30, 10000, 50, 50, 10, true, {"createclone"}) -- 创建一个带有物理护盾和魔法护盾的怪物   
+    --save.loadMonsterHealth(boss)
 end
 
 function battleManager.update(dt)
     -- 更新 Fabao
-    lFabao:update(dt, bulletList, target)
+    lFabao:update(dt)
 
-    -- 更新子弹
-    for i = #bulletList, 1, -1 do
-        local bullets = bulletList[i]
-        bullets:update(dt, target)
-
-        -- 检测子弹是否击中怪物
-        if target:checkBulletCollision(bullets) then
-            table.remove(bulletList, i)
-            target:takeDamage(bullets.damage, bullets.attribute)
-            --print(bullets.attribute)
-            screenShake.duration = 0.05 -- 屏幕震动持续时间
-            screenShake.intensity = 2 -- 屏幕震动强度
-
-            -- 检查是否需要生成新的灵魂
-            target:checkGenerateSoul(soulList)
-
-            -- 添加伤害数字
-            target:addDamageNumber(damageNumbers, bullets)
-        end
-    end
-
-    -- 更新怪物受击效果
-    target:update(dt)
-
-    -- 更新屏幕震动
-    if screenShake.duration > 0 then
-        screenShake.duration = screenShake.duration - dt
+    for _, monster in ipairs(monsterList) do
+        monster:update(dt)
     end
 
     -- 更新伤害数字
@@ -176,7 +150,7 @@ function battleManager.keypressed(key)
 end
 
 function battleManager.saveGame()
-    save.saveMonsterHealth(target)
+    save.saveMonsterHealth(boss)
 end
 
 
@@ -184,37 +158,31 @@ end
 function battleManager.draw()
     -- 绘制 Fabao
     lFabao:draw()
-    lFabao:drawDurabilityBar()
-    lFabao:drawFireRateBar()
-
-    -- 绘制子弹
-    for i, bullets in ipairs(bulletList) do
-        bullets:draw()
-    end
-
+    
     -- 绘制目标点（怪物）
-    target:draw()
-
+    for _, monster in ipairs(monsterList) do
+        monster:draw()
+    end
     -- 绘制怪物血条
     love.graphics.setColor(1, 0, 0) -- 设置颜色为红色
-    love.graphics.rectangle("fill", love.graphics.getWidth() - 210, 10, 200 * (target.health / target.maxHealth), 20) -- 绘制血条
+    love.graphics.rectangle("fill", love.graphics.getWidth() - 210, 10, 200 * (boss.health / boss.maxHealth), 20) -- 绘制血条
     love.graphics.setColor(1, 1, 1) -- 设置颜色为白色
     love.graphics.rectangle("line", love.graphics.getWidth() - 210, 10, 200, 20) -- 绘制血条边框
-    love.graphics.print("Health: " .. target.health .. "/" .. target.maxHealth, love.graphics.getWidth() - 210, 35) -- 绘制血量数值
+    love.graphics.print("Health: " .. boss.health .. "/" .. boss.maxHealth, love.graphics.getWidth() - 210, 35) -- 绘制血量数值
 
     -- 绘制物理护盾血条
     love.graphics.setColor(0, 0, 1) -- 设置颜色为蓝色
-    love.graphics.rectangle("fill", love.graphics.getWidth() - 210, 80, 200 * (target.physicalShield / target.maxPhysicalShield), 10) -- 绘制物理护盾血条
+    love.graphics.rectangle("fill", love.graphics.getWidth() - 210, 80, 200 * (boss.physicalShield / boss.maxPhysicalShield), 10) -- 绘制物理护盾血条
     love.graphics.setColor(1, 1, 1) -- 设置颜色为白色
     love.graphics.rectangle("line", love.graphics.getWidth() - 210, 80, 200, 10) -- 绘制物理护盾血条边框
-    love.graphics.print("Physical Shield: " .. target.physicalShield, love.graphics.getWidth() - 210, 100) -- 绘制物理护盾数值
+    love.graphics.print("Physical Shield: " .. boss.physicalShield, love.graphics.getWidth() - 210, 100) -- 绘制物理护盾数值
 
     -- 绘制魔法护盾血条
     love.graphics.setColor(1, 0, 1) -- 设置颜色为紫色
-    love.graphics.rectangle("fill", love.graphics.getWidth() - 210, 150, 200 * (target.magicShield / target.maxMagicShield), 10) -- 绘制魔法护盾血条
+    love.graphics.rectangle("fill", love.graphics.getWidth() - 210, 150, 200 * (boss.magicShield / boss.maxMagicShield), 10) -- 绘制魔法护盾血条
     love.graphics.setColor(1, 1, 1) -- 设置颜色为白色
     love.graphics.rectangle("line", love.graphics.getWidth() - 210, 150, 200, 10) -- 绘制魔法护盾血条边框
-    love.graphics.print("Magic Shield: " .. target.magicShield, love.graphics.getWidth() - 210, 170) -- 绘制魔法护盾数值
+    love.graphics.print("Magic Shield: " .. boss.magicShield, love.graphics.getWidth() - 210, 170) -- 绘制魔法护盾数值
 
     -- 绘制伤害数字
     for i, dmg in ipairs(damageNumbers) do

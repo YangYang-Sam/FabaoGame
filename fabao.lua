@@ -21,10 +21,78 @@ function Fabao.new(fabaoId,fabaolv,bulletType, fireRate, bulletCount, durability
     self.bulletEffects = bulletEffects or {} -- 子弹效果
     self.imagepath = love.graphics.newImage(imagePath or "Sword-base.png") -- 加载法宝图片
     self.bulletAttribute = bulletAttribute or "physical" -- 子弹属性，默认为物理属性
+    self.target = nil
+    self.bulletList = {}
     return self
 end
 
-function Fabao:update(dt, bulletList, target)
+function Fabao:findTarget()
+    local target = nil
+    for i, monster in ipairs(monsterList) do
+        if not target or monster.priority > target.priority then
+            target = monster
+        end
+    end
+    return target
+end
+
+function Fabao:fireBullet(dt)
+    local target = self:findTarget()
+    if target then
+        self.bulletTimer = self.bulletTimer + dt
+        if self.bulletTimer >= self.fireRate and self.durability > 0 then
+            self.bulletTimer = 0
+            self.durability = self.durability - self.durabilityCost -- 消耗耐久值
+            for i = 1, self.bulletCount do
+                local angle
+                if self.bulletType == "feijian" then
+                    angle = math.random() * (2 * math.pi) -- 随机方向
+                    table.insert(self.bulletList, bullet.new(
+                        target, 
+                        self.x, 
+                        self.y, 
+                        angle, 
+                        self.bulletSpeed, 
+                        self.bulletDamage, 
+                        self.bulletRadius, 
+                        self.bulletEffects, 
+                        true,
+                        20,
+                        self.bulletAttribute,
+                        true,
+                        'Feijian-blt.png')) -- 创建跟踪子弹
+                else
+                    angle = math.atan2(target.y - self.y, target.x - self.x) -- 直接指向目标
+                    table.insert(self.bulletList, bullet.new(
+                        target, 
+                        self.x, self.y, 
+                        angle, 
+                        self.bulletSpeed, 
+                        self.bulletDamage, 
+                        self.bulletRadius, 
+                        self.bulletEffects, 
+                        false, 
+                        20, 
+                        self.bulletAttribute, 
+                        true,
+                        'Jiguang-blt.png')) -- 创建非跟踪子弹
+                end
+            end
+
+
+        end
+
+       
+    --target=self:findTarget()
+    end
+end
+
+function Fabao:checkBulletCollision(bullet,monster)
+    local distance = math.sqrt((monster.x - bullet.x)^2 + (monster.y - bullet.y)^2)
+    return distance < monster.radius + bullet.range
+end
+
+function Fabao:update(dt)
     -- 移动法宝
     if love.keyboard.isDown("left") then
         self.x = self.x - self.speed * dt
@@ -39,25 +107,46 @@ function Fabao:update(dt, bulletList, target)
         self.y = self.y + self.speed * dt
     end
 
-    self.bulletTimer = self.bulletTimer + dt
-    if self.bulletTimer >= self.fireRate and self.durability > 0 then
-        self.bulletTimer = 0
-        self.durability = self.durability - self.durabilityCost -- 消耗耐久值
-        for i = 1, self.bulletCount do
-            local angle
-            if self.bulletType == "feijian" then
-                angle = math.random() * (2 * math.pi) -- 随机方向
-                table.insert(bulletList, bullet.new(self.x, self.y, angle, self.bulletSpeed, self.bulletDamage, self.bulletRadius, self.bulletEffects, true,20,self.bulletAttribute,true,'Feijian-blt.png')) -- 创建跟踪子弹
-            else
-                angle = math.atan2(target.y - self.y, target.x - self.x) -- 直接指向目标
-                table.insert(bulletList, bullet.new(self.x, self.y, angle, self.bulletSpeed, self.bulletDamage, self.bulletRadius, self.bulletEffects, false, 20, self.bulletAttribute, true)) -- 创建非跟踪子弹
+    local target=self:findTarget()
+    
+    self:fireBullet(dt)
+
+     -- 更新子弹
+     for i = #self.bulletList, 1, -1 do
+        local bullets = self.bulletList[i]
+        if bullets.target==nil or bullets.target.isDead then
+            bullets.target = self:findTarget()
+        end
+        bullets:update(dt)
+        -- 检测子弹是否击中怪物
+        if target then
+            if target:checkBulletCollision(bullets) then
+                --print('hit')
+                table.remove(self.bulletList, i)
+                target:takeDamage(bullets.damage, bullets.attribute)
+                -- 检查是否需要生成新的灵魂
+                target:checkGenerateSoul(soulList)
+
+                -- 添加伤害数字
+                target:addDamageNumber(damageNumbers, bullets)
             end
+        else
+            table.remove(self.bulletList,i)
         end
     end
+
+    
+
 end
 
 function Fabao:draw()
     love.graphics.draw(self.imagepath, self.x, self.y, 0, 1, 1, self.imagepath:getWidth() / 2, self.imagepath:getHeight() / 2) -- 绘制法宝图片
+    self:drawDurabilityBar() -- 绘制耐久值条
+    self:drawFireRateBar() -- 绘制攻击间隔条
+
+    for _, bullet in ipairs(self.bulletList) do
+        bullet:draw()
+    end
 end
 
 function Fabao:drawDurabilityBar()
