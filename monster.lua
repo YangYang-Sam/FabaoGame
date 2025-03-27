@@ -152,6 +152,7 @@ function Monster:draw()
             local dx = math.random(-2, 2)
             local dy = math.random(-2, 2)
             love.graphics.circle('fill', self.x + dx, self.y + dy, self.radius)
+            effects.startScreenShake(0.05,1)--屏幕震动
         else
             love.graphics.setColor(1, 1, 0)
             love.graphics.circle('fill', self.x, self.y, self.radius)

@@ -1,0 +1,30 @@
+-- 加载 push 库
+local push = require 'Scripts.Libs.push'
+
+-- 定义虚拟宽度和高度
+VIRTUAL_WIDTH = 384
+VIRTUAL_HEIGHT = 216
+
+-- 定义窗口宽度和高度
+WINDOW_WIDTH = 1280
+WINDOW_HEIGHT = 720
+
+-- 设置屏幕
+--[[push:setupScreen(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, {
+    vsync = true,
+    upscale = "normal",
+    canvas = true
+})]]
+
+-- 设置窗口标题
+love.window.setTitle("Arkanoid!!!")
+
+-- 设置默认过滤器
+love.graphics.setDefaultFilter('nearest', 'nearest')
+
+-- 其他初始化代码
+-- love.graphics.setFont(gFonts.small)
+-- gStateMachine:change('main-menu')
+-- gSounds.music:setVolume(0.4)
+-- gSounds.music:play()
+-- gSounds.music:setLooping(true)

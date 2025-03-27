@@ -74,7 +74,7 @@ function Fabao:fireBullet(dt)
                         false, 
                         20, 
                         self.bulletAttribute, 
-                        true,
+                        fasle,
                         'Jiguang-blt.png')) -- 创建非跟踪子弹
                 end
             end

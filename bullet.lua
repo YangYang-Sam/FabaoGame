@@ -59,9 +59,11 @@ function Bullet:update(dt)
 end
 
 function Bullet:draw()
-    local scale =2 --设置缩放比例为2倍
-    local angle =math.atan2(self.dy,self.dx)+math.pi/2 --更新子弹角度
-    love.graphics.draw(self.bulletImage,self.x,self.y,angle,scale,scale,self.bulletImage:getWidth()/2,self.bulletImage:getHeight()/2)
+    if self.showImage then
+        local scale =2 --设置缩放比例为2倍
+        local angle =math.atan2(self.dy,self.dx)+math.pi/2 --更新子弹角度
+        love.graphics.draw(self.bulletImage,self.x,self.y,angle,scale,scale,self.bulletImage:getWidth()/2,self.bulletImage:getHeight()/2)
+    end 
 end
 
 return Bullet

@@ -1,36 +1,25 @@
 require('dependencies')
+--push = require 'Scripts.Libs.push'
 
 local gameState = "menu" -- 当前游戏状态，默认为菜单界面
 local particleEffect -- 用于存储粒子效果
 
--- 解析 CSV 文件的函数
-local function parseCSV(filePath)
-    local file = io.open(filePath, "r")
-    if not file then
-        return nil, "Failed to open file."
-    end
+--love.window.setMode(1280, 720, {resizable = true}) -- Resizable 1280x720 window
+--push.setupScreen(1280, 720, {upscale = "normal"}) -- 800x600 game resolution, upscaled
 
-    local content = {}
-    for line in file:lines() do
-        local row = {}
-        for value in line:gmatch("([^,]+)") do
-            table.insert(row, value)
-        end
-        table.insert(content, row)
-    end
-
-    file:close()
-    return content
+function love.resize(width, height)
+	--push.resize(width, height)
 end
 
 function love.load()
+
+
+
     -- 初始化游戏状态
     love.graphics.setBackgroundColor(0.1, 0.1, 0.1) -- 设置背景颜色
 
     -- 加载中文字体
-    font1 = love.graphics.newFont("Fonts/Microsoft_YaHei_Bold.ttf", 20) -- 加载字体文件，字号为20
-    font2 = love.graphics.newFont("Fonts/AlimamaFangYuanTiVF-Thin.ttf", 20) -- 加载字体文件，字号为30
-    love.graphics.setFont(font2) -- 设置全局字体
+    love.graphics.setFont(gFonts['small']) -- 设置全局字体
 
     -- 初始化粒子效果
     particleEffect = particles.new(100, 100)
@@ -79,6 +68,7 @@ function love.keypressed(key)
 end
 
 function love.draw()
+    --push.start()
     if gameState == "menu" then
         -- 绘制菜单界面
         love.graphics.setColor(1, 1, 1) -- 设置颜色为白色
@@ -92,6 +82,7 @@ function love.draw()
     elseif gameState == "game" then
         battleManager.draw()
     end
+    --push.finish()
 end
 
 function love.quit()
